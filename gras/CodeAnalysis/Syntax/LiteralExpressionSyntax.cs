@@ -3,16 +3,16 @@
     internal sealed class LiteralExpressionSyntax : ExpressionSyntax
     {
         public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
-        public SyntaxToken NumberToken { get; }
+        public SyntaxToken LiteralToken { get; }
 
         public LiteralExpressionSyntax(SyntaxToken numberToken)
         {
-            NumberToken = numberToken;
+            LiteralToken = numberToken;
         }
 
         public override IEnumerable<SyntaxNode> GetChildren()
         {
-            yield return NumberToken;
+            yield return LiteralToken;
         }
     }
 }
