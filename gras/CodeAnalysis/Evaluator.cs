@@ -1,7 +1,7 @@
 ﻿using System;
 namespace gras.CodeAnalysis
 {
-    public class Evaluator
+    public sealed class Evaluator
     {
         private readonly ExpressionSyntax root;
 
@@ -17,7 +17,7 @@ namespace gras.CodeAnalysis
 
         public int EvaluateExpression(ExpressionSyntax node)
         {
-            if (node is NumberExpressionSyntax n)
+            if (node is LiteralExpressionSyntax n)
             {
                 return (int)n.NumberToken.Value;
             }

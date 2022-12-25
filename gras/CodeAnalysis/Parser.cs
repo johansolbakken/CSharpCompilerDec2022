@@ -1,11 +1,13 @@
 ﻿using System;
 namespace gras.CodeAnalysis
 {
-    public class Parser
+    internal sealed class Parser
     {
         private readonly SyntaxToken[] m_tokens;
         private int m_position;
         private List<string> m_diagnostics = new();
+        public IEnumerable<string> Diagnostics => m_diagnostics;
+        private SyntaxToken m_current => Peek(0);
 
         public Parser(string text)
         {
@@ -28,8 +30,6 @@ namespace gras.CodeAnalysis
             m_diagnostics.AddRange(lexer.Diagnostics);
         }
 
-        public IEnumerable<string> Diagnostics => m_diagnostics;
-
         private SyntaxToken Peek(int offset)
         {
             var index = m_position + offset;
@@ -38,8 +38,6 @@ namespace gras.CodeAnalysis
             else
                 return m_tokens[index];
         }
-
-        private SyntaxToken m_current => Peek(0);
 
         private SyntaxToken NextToken()
         {
@@ -111,8 +109,8 @@ namespace gras.CodeAnalysis
 
                 return new ParenthesizedExpressionSyntax(left, expression, right);
             }
-            var numberToken = Match(SyntaxKind.NumberToken);
-            return new NumberExpressionSyntax(numberToken);
+            var numberToken = Match(SyntaxKind.LiteralToken);
+            return new LiteralExpressionSyntax(numberToken);
         }
     }
 }
