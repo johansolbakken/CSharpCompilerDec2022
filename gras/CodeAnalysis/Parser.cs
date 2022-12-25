@@ -68,7 +68,7 @@ namespace gras.CodeAnalysis
 
             while (true)
             {
-                var precedence = GetBinaryOperatorPresedence(m_current.Kind);
+                var precedence = SyntaxFacts.GetBinaryOperatorPresedence(m_current.Kind);
                 if (precedence == 0 || precedence <= parentPrecedence)
                     break;
 
@@ -78,24 +78,6 @@ namespace gras.CodeAnalysis
             }
 
             return left;
-        }
-
-        private int GetBinaryOperatorPresedence(SyntaxKind kind)
-        {
-            switch (kind)
-            {
-                case SyntaxKind.PlusToken:
-                case SyntaxKind.MinusToken:
-                    return 1;
-                case SyntaxKind.MultiplyToken:
-                case SyntaxKind.DivideToken:
-                    return 2;
-                case SyntaxKind.OpenParenToken:
-                case SyntaxKind.CloseParenToken:
-                    return 3;
-                default:
-                    return 0;
-            }
         }
 
         private ExpressionSyntax ParsePrimaryExpression()
