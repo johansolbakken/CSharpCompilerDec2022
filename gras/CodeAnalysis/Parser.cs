@@ -55,11 +55,6 @@ namespace gras.CodeAnalysis
             return new SyntaxToken(kind, m_current.Position, null, null);
         }
 
-        private ExpressionSyntax ParseExpression()
-        {
-            return ParseTerm();
-        }
-
         public SyntaxTree Parse()
         {
             var expression = ParseExpression();
@@ -67,36 +62,40 @@ namespace gras.CodeAnalysis
             return new SyntaxTree(Diagnostics, expression, endOfFileToken);
         }
 
-        public ExpressionSyntax ParseTerm()
+        private ExpressionSyntax ParseExpression(int parentPrecedence = 0)
         {
-            var left = ParseFactor();
+            var left = ParsePrimaryExpression();
 
-            while (m_current.Kind == SyntaxKind.PlusToken
-                 || m_current.Kind == SyntaxKind.MinusToken
-                 || m_current.Kind == SyntaxKind.MultiplyToken
-                 || m_current.Kind == SyntaxKind.DivideToken)
+            while (true)
             {
+                var precedence = GetBinaryOperatorPresedence(m_current.Kind);
+                if (precedence == 0 || precedence <= parentPrecedence)
+                    break;
+
                 var operatorToken = NextToken();
-                var right = ParseFactor();
+                var right = ParseExpression(precedence);
                 left = new BinaryExpressionSyntax(left, operatorToken, right);
             }
 
             return left;
         }
 
-        public ExpressionSyntax ParseFactor()
+        private int GetBinaryOperatorPresedence(SyntaxKind kind)
         {
-            var left = ParsePrimaryExpression();
-
-            while (m_current.Kind == SyntaxKind.MultiplyToken
-                 || m_current.Kind == SyntaxKind.DivideToken)
+            switch (kind)
             {
-                var operatorToken = NextToken();
-                var right = ParsePrimaryExpression();
-                left = new BinaryExpressionSyntax(left, operatorToken, right);
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.MinusToken:
+                    return 1;
+                case SyntaxKind.MultiplyToken:
+                case SyntaxKind.DivideToken:
+                    return 2;
+                case SyntaxKind.OpenParenToken:
+                case SyntaxKind.CloseParenToken:
+                    return 3;
+                default:
+                    return 0;
             }
-
-            return left;
         }
 
         private ExpressionSyntax ParsePrimaryExpression()
