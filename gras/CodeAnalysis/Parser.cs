@@ -5,9 +5,9 @@ namespace gras.CodeAnalysis
     {
         private readonly SyntaxToken[] m_tokens;
         private int m_position;
-        private List<string> m_diagnostics = new();
+        private readonly List<string> m_diagnostics = new();
         public IEnumerable<string> Diagnostics => m_diagnostics;
-        private SyntaxToken m_current => Peek(0);
+        private SyntaxToken Current => Peek(0);
 
         public Parser(string text)
         {
@@ -41,18 +41,18 @@ namespace gras.CodeAnalysis
 
         private SyntaxToken NextToken()
         {
-            var current = m_current;
+            var current = Current;
             m_position++;
             return current;
         }
 
         private SyntaxToken Match(SyntaxKind kind)
         {
-            if (m_current.Kind == kind)
+            if (Current.Kind == kind)
                 return NextToken();
 
-            m_diagnostics.Add($"ERROR: Unexpected token <{m_current.Kind}>, expected <{kind}>");
-            return new SyntaxToken(kind, m_current.Position, null, null);
+            m_diagnostics.Add($"ERROR: Unexpected token <{Current.Kind}>, expected <{kind}>");
+            return new SyntaxToken(kind, Current.Position, null, null);
         }
 
         public SyntaxTree Parse()
@@ -64,11 +64,23 @@ namespace gras.CodeAnalysis
 
         private ExpressionSyntax ParseExpression(int parentPrecedence = 0)
         {
-            var left = ParsePrimaryExpression();
+            ExpressionSyntax left;
+            var unaryOperatorPrecedence = Current.Kind.GetBinaryOperatorPresedence();
+            if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence)
+            {
+                var operatorToken = NextToken();
+                var operand = ParseExpression(unaryOperatorPrecedence);
+                left = new UnaryExpressionSyntax(operatorToken, operand);
+
+            }
+            else
+            {
+                left = ParsePrimaryExpression();
+            }
 
             while (true)
             {
-                var precedence = SyntaxFacts.GetBinaryOperatorPresedence(m_current.Kind);
+                var precedence = SyntaxFacts.GetBinaryOperatorPresedence(Current.Kind);
                 if (precedence == 0 || precedence <= parentPrecedence)
                     break;
 
@@ -82,7 +94,7 @@ namespace gras.CodeAnalysis
 
         private ExpressionSyntax ParsePrimaryExpression()
         {
-            if (m_current.Kind == SyntaxKind.OpenParenToken)
+            if (Current.Kind == SyntaxKind.OpenParenToken)
             {
                 var left = NextToken();
                 var expression = ParseExpression();
