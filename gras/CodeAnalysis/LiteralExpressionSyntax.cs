@@ -2,7 +2,7 @@
 {
     internal sealed class LiteralExpressionSyntax : ExpressionSyntax
     {
-        public override SyntaxKind Kind => SyntaxKind.NumberExpression;
+        public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
         public SyntaxToken NumberToken { get; }
 
         public LiteralExpressionSyntax(SyntaxToken numberToken)
