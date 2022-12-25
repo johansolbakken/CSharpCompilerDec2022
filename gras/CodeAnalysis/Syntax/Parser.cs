@@ -1,11 +1,13 @@
 ﻿using System;
-namespace gras.CodeAnalysis
+namespace gras.CodeAnalysis.Syntax
 {
-    public class Parser
+    internal sealed class Parser
     {
         private readonly SyntaxToken[] m_tokens;
         private int m_position;
-        private List<string> m_diagnostics = new();
+        private readonly List<string> m_diagnostics = new();
+        public IEnumerable<string> Diagnostics => m_diagnostics;
+        private SyntaxToken Current => Peek(0);
 
         public Parser(string text)
         {
@@ -15,7 +17,7 @@ namespace gras.CodeAnalysis
             SyntaxToken token;
             do
             {
-                token = lexer.NextToken();
+                token = lexer.Lex();
                 if (token.Kind != SyntaxKind.WhitespaceToken &&
                     token.Kind != SyntaxKind.BadToken)
                 {
@@ -28,8 +30,6 @@ namespace gras.CodeAnalysis
             m_diagnostics.AddRange(lexer.Diagnostics);
         }
 
-        public IEnumerable<string> Diagnostics => m_diagnostics;
-
         private SyntaxToken Peek(int offset)
         {
             var index = m_position + offset;
@@ -39,27 +39,20 @@ namespace gras.CodeAnalysis
                 return m_tokens[index];
         }
 
-        private SyntaxToken m_current => Peek(0);
-
         private SyntaxToken NextToken()
         {
-            var current = m_current;
+            var current = Current;
             m_position++;
             return current;
         }
 
         private SyntaxToken Match(SyntaxKind kind)
         {
-            if (m_current.Kind == kind)
+            if (Current.Kind == kind)
                 return NextToken();
 
-            m_diagnostics.Add($"ERROR: Unexpected token <{m_current.Kind}>, expected <{kind}>");
-            return new SyntaxToken(kind, m_current.Position, null, null);
-        }
-
-        private ExpressionSyntax ParseExpression()
-        {
-            return ParseTerm();
+            m_diagnostics.Add($"ERROR: Unexpected token <{Current.Kind}>, expected <{kind}>");
+            return new SyntaxToken(kind, Current.Position, null, null);
         }
 
         public SyntaxTree Parse()
@@ -69,32 +62,30 @@ namespace gras.CodeAnalysis
             return new SyntaxTree(Diagnostics, expression, endOfFileToken);
         }
 
-        public ExpressionSyntax ParseTerm()
+        private ExpressionSyntax ParseExpression(int parentPrecedence = 0)
         {
-            var left = ParseFactor();
-
-            while (m_current.Kind == SyntaxKind.PlusToken
-                 || m_current.Kind == SyntaxKind.MinusToken
-                 || m_current.Kind == SyntaxKind.MultiplyToken
-                 || m_current.Kind == SyntaxKind.DivideToken)
+            ExpressionSyntax left;
+            var unaryOperatorPrecedence = Current.Kind.GetBinaryOperatorPresedence();
+            if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence)
             {
                 var operatorToken = NextToken();
-                var right = ParseFactor();
-                left = new BinaryExpressionSyntax(left, operatorToken, right);
+                var operand = ParseExpression(unaryOperatorPrecedence);
+                left = new UnaryExpressionSyntax(operatorToken, operand);
+
+            }
+            else
+            {
+                left = ParsePrimaryExpression();
             }
 
-            return left;
-        }
-
-        public ExpressionSyntax ParseFactor()
-        {
-            var left = ParsePrimaryExpression();
-
-            while (m_current.Kind == SyntaxKind.MultiplyToken
-                 || m_current.Kind == SyntaxKind.DivideToken)
+            while (true)
             {
+                var precedence = SyntaxFacts.GetBinaryOperatorPresedence(Current.Kind);
+                if (precedence == 0 || precedence <= parentPrecedence)
+                    break;
+
                 var operatorToken = NextToken();
-                var right = ParsePrimaryExpression();
+                var right = ParseExpression(precedence);
                 left = new BinaryExpressionSyntax(left, operatorToken, right);
             }
 
@@ -103,7 +94,7 @@ namespace gras.CodeAnalysis
 
         private ExpressionSyntax ParsePrimaryExpression()
         {
-            if (m_current.Kind == SyntaxKind.OpenParenToken)
+            if (Current.Kind == SyntaxKind.OpenParenToken)
             {
                 var left = NextToken();
                 var expression = ParseExpression();
@@ -111,8 +102,8 @@ namespace gras.CodeAnalysis
 
                 return new ParenthesizedExpressionSyntax(left, expression, right);
             }
-            var numberToken = Match(SyntaxKind.NumberToken);
-            return new NumberExpressionSyntax(numberToken);
+            var numberToken = Match(SyntaxKind.LiteralToken);
+            return new LiteralExpressionSyntax(numberToken);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace gras.CodeAnalysis
+﻿namespace gras.CodeAnalysis.Syntax
 {
     public abstract class SyntaxNode
     {

@@ -1,4 +1,6 @@
 ﻿using gras.CodeAnalysis;
+using gras.CodeAnalysis.Syntax;
+using gras.CodeAnalysis.Binding;
 
 void prettyPrint(SyntaxNode node, string indent = "", bool isLast = true)
 {
@@ -53,7 +55,9 @@ while (true)
     }
 
     var syntaxTree = SyntaxTree.parse(line);
-
+    var binder = new Binder();
+    var boundExpression = binder.BindExpression(syntaxTree.Root);
+    var diagnostics = syntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
 
     if (showTree)
     {
@@ -61,7 +65,9 @@ while (true)
         prettyPrint(syntaxTree.Root);
     }
 
-    if (syntaxTree.Diagnostics.Any())
+
+
+    if (diagnostics.Any())
     {
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (var message in syntaxTree.Diagnostics)
@@ -72,7 +78,7 @@ while (true)
     else
     {
         Console.ForegroundColor = ConsoleColor.White;
-        var e = new Evaluator(syntaxTree.Root);
+        var e = new Evaluator(boundExpression);
         var result = e.Evaluate();
         Console.WriteLine(result);
     }

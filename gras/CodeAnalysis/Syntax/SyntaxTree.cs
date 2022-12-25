@@ -1,6 +1,6 @@
-﻿namespace gras.CodeAnalysis
+﻿namespace gras.CodeAnalysis.Syntax
 {
-    public class SyntaxTree
+    public sealed class SyntaxTree
     {
         public IReadOnlyList<string> Diagnostics { get; }
         public ExpressionSyntax Root { get; }

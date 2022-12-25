@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace gras.CodeAnalysis
+namespace gras.CodeAnalysis.Syntax
 {
-    public class Lexer
+    internal sealed class Lexer
     {
         private readonly string m_text;
         private int m_position;
         private readonly List<string> m_diagnostics = new();
+        public IEnumerable<string> Diagnostics => m_diagnostics;
 
         public Lexer(string text)
         {
             m_text = text;
         }
-
-        public IEnumerable<string> Diagnostics => m_diagnostics;
 
         private char Current
         {
@@ -32,6 +31,7 @@ namespace gras.CodeAnalysis
             m_position++;
         }
 
+        // A very nice data structure!
         private readonly Dictionary<char, SyntaxKind> tokenDict = new()
         {
             {'+', SyntaxKind.PlusToken },
@@ -42,8 +42,8 @@ namespace gras.CodeAnalysis
             {')', SyntaxKind.CloseParenToken }
         };
 
-
-        public SyntaxToken NextToken()
+        // A lexer lexes haha
+        public SyntaxToken Lex()
         {
             // End of file
             if (m_position >= m_text.Length)
@@ -63,7 +63,7 @@ namespace gras.CodeAnalysis
                 var text = m_text.Substring(start, length);
                 if (!int.TryParse(text, out var value))
                     m_diagnostics.Add($"ERROR: Failed to parse int32 '{text}'");
-                return new SyntaxToken(SyntaxKind.NumberToken, start, text, value);
+                return new SyntaxToken(SyntaxKind.LiteralToken, start, text, value);
             }
 
             // Whitespace

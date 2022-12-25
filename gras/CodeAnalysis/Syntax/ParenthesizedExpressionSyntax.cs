@@ -1,6 +1,6 @@
-﻿namespace gras.CodeAnalysis
+﻿namespace gras.CodeAnalysis.Syntax
 {
-    public class ParenthesizedExpressionSyntax : ExpressionSyntax
+    internal sealed class ParenthesizedExpressionSyntax : ExpressionSyntax
     {
         public SyntaxToken OpenParenthesisToken { get; }
         public ExpressionSyntax Expression { get; }

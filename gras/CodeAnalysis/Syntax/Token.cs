@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace gras.CodeAnalysis
+namespace gras.CodeAnalysis.Syntax
 {
-    public class SyntaxToken : SyntaxNode
+    public sealed class SyntaxToken : SyntaxNode
     {
         public int Position { get; }
         public string Text { get; }
