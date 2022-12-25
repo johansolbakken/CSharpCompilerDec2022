@@ -31,6 +31,7 @@ namespace gras.CodeAnalysis
             m_position++;
         }
 
+        // A very nice data structure!
         private readonly Dictionary<char, SyntaxKind> tokenDict = new()
         {
             {'+', SyntaxKind.PlusToken },
@@ -41,8 +42,8 @@ namespace gras.CodeAnalysis
             {')', SyntaxKind.CloseParenToken }
         };
 
-
-        public SyntaxToken NextToken()
+        // A lexer lexes haha
+        public SyntaxToken Lex()
         {
             // End of file
             if (m_position >= m_text.Length)
