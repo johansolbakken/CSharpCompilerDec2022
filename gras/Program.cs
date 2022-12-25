@@ -1,4 +1,5 @@
 ﻿using gras.CodeAnalysis;
+using gras.CodeAnalysis.Syntax;
 
 void prettyPrint(SyntaxNode node, string indent = "", bool isLast = true)
 {
@@ -53,7 +54,6 @@ while (true)
     }
 
     var syntaxTree = SyntaxTree.parse(line);
-
 
     if (showTree)
     {

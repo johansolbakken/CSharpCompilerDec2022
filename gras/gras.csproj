@@ -9,8 +9,10 @@
 
   <ItemGroup>
     <None Remove="CodeAnalysis\" />
+    <None Remove="CodeAnalysis\Syntax\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis\" />
+    <Folder Include="CodeAnalysis\Syntax\" />
   </ItemGroup>
 </Project>

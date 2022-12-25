@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace gras.CodeAnalysis
+namespace gras.CodeAnalysis.Syntax
 {
     public sealed class SyntaxToken : SyntaxNode
     {

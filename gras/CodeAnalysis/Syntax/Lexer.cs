@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace gras.CodeAnalysis
+namespace gras.CodeAnalysis.Syntax
 {
     internal sealed class Lexer
     {
