@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="CodeAnalysis\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeAnalysis\" />
+  </ItemGroup>
 </Project>
